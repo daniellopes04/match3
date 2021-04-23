@@ -1,4 +1,4 @@
-# Match-3
+![Match-3](https://github.com/daniellopes04/match3/blob/main/graphics/match3.png)
 
 ***Lecture 3* on "S50's Intro to Game Development" course, available on [YouTube](https://www.youtube.com/playlist?list=PLWKjhJtqVAbluXJKKbCIb4xd7fcRkpzoz)**
  
