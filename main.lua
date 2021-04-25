@@ -25,9 +25,11 @@ function love.load()
     -- Game board of tiles
     board = generateBoard()
 
+    -- Tile selected to be swapped
     highlightedTile = false
     highlightedX, highlightedY = 1, 1
 
+    -- Current selected tile, changed with arrow keys
     selectedTile = board[1][1]
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
@@ -46,30 +48,36 @@ end
 
 function love.keypressed(key)
     love.keyboard.keysPressed[key] = true
+end
 
+function love.keyboard.wasPressed(key)
+    return love.keyboard.keysPressed[key]
+end
+
+function love.update(dt)
     local x, y = selectedTile.gridX, selectedTile.gridY
 
     -- Moving the selected tile
-    if key == 'up' then
+    if love.keyboard.wasPressed('up') then
         if y > 1 then
             selectedTile = board[y - 1][x]
         end
-    elseif key == 'down' then
+    elseif love.keyboard.wasPressed('down') then
         if y < 8 then
             selectedTile = board[y + 1][x]
         end
-    elseif key == 'left' then
+    elseif love.keyboard.wasPressed('left') then
         if x > 1 then
             selectedTile = board[y][x - 1]
         end
-    elseif key == 'right' then
+    elseif love.keyboard.wasPressed('right') then
         if x < 8 then
             selectedTile = board[y][x + 1]
         end
     end
     
     -- When enter is pressed we highlight a tile
-    if key == 'enter' or key == 'return' then
+    if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
         if not highlightedTile then
             highlightedTile = true
             highlightedX, highlightedY = selectedTile.gridX, selectedTile.gridY
@@ -77,7 +85,7 @@ function love.keypressed(key)
             local tile1 = selectedTile
             local tile2 = board[highlightedY][highlightedX]
 
-            -- Swap temporary information
+            -- Temporary swap information
             local tempX, tempY = tile2.x, tile2.y 
             local tempGridX, tempGridY = tile2.gridX, tile2.gridY
 
@@ -87,28 +95,26 @@ function love.keypressed(key)
             board[tile2.gridY][tile2.gridX] = tempTile
 
             -- Swap tile coordinates
-            tile2.x, tile2.y = tile1.x, tile1.y 
+            Timer.tween(0.2, {
+                [tile2] = {x = tile1.x, y = tile1.y},
+                [tile1] = {x = tempX, y = tempY}
+            })
+            
             tile2.gridX, tile2.gridY = tile1.gridX, tile1.gridY
-            tile1.x, tile1.y = tempX, tempY 
             tile1.gridX, tile1.gridY = tempGridX, tempGridY
 
+            -- Unhighlight the tile and reset selection
             highlightedTile = false
-
             selectedTile = tile2
         end
     end
 
-    if key == 'escape' then 
+    if love.keyboard.wasPressed('escape') then 
         love.event.quit()
     end
-end
 
-function love.keyboard.wasPressed(key)
-    return love.keyboard.keysPressed[key]
-end
+    Timer.update(dt)
 
-function love.update(dt)
-    -- Reset the keys pressed
     love.keyboard.keysPressed = {}
 end
 

@@ -66,6 +66,10 @@ function generateBoard()
     return tiles
 end
 
+--[[
+    Draws each tile on the screen as well as the rectangle of the highlighted tile 
+    and the rectangle when a tile is selected 
+]] 
 function drawBoard(offsetX, offsetY)
     -- Draw the columns
     for y = 1, 8 do
