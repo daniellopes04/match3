@@ -53,6 +53,10 @@ function generateBoard()
                 x = (x - 1) * 32,
                 y = (y - 1) * 32,
 
+                -- What tile x and y this tile is
+                gridX = x,
+                gridY = y,
+
                 -- Assign a random ID to tile
                 tile = math.random(#tileQuads)
             })
@@ -71,6 +75,22 @@ function drawBoard(offsetX, offsetY)
 
             love.graphics.draw(tileSprite, tileQuads[tile.tile], 
             tile.x + offsetX, tile.y + offsetY)
+
+            if highlightedTile then
+                if tile.gridX == highlightedX and tile.gridY == highlightedY then
+                    love.graphics.setColor(1, 1, 1, 0.5)
+                    love.graphics.rectangle('fill', tile.x + offsetX, tile.y + offsetY, 
+                    32, 32, 4)
+                    love.graphics.setColor(1, 1, 1, 1)
+                end
+            end
         end
     end
+
+    -- Current selected tile
+    love.graphics.setColor(1, 0, 0, 0.9)
+    love.graphics.setLineWidth(4)
+    love.graphics.rectangle('line', selectedTile.x + offsetX, selectedTile.y + offsetY,
+    32, 32, 4)
+    love.graphics.setColor(1, 1, 1, 1)
 end
