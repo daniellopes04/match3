@@ -94,7 +94,7 @@ function love.update(dt)
             board[tile1.gridY][tile1.gridX] = tile2
             board[tile2.gridY][tile2.gridX] = tempTile
 
-            -- Swap tile coordinates
+            -- Swap tile coordinates using tween
             Timer.tween(0.2, {
                 [tile2] = {x = tile1.x, y = tile1.y},
                 [tile1] = {x = tempX, y = tempY}
