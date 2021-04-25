@@ -17,14 +17,14 @@ push = require 'lib/push'
 -- https://github.com/vrld/hump/blob/master/class.lua
 Class = require 'lib/class'
 
--- Timer and tween library
--- https://github.com/airstruck/knife/blob/master/readme/timer.md
+-- Knife library
+-- https://github.com/airstruck/knife/
 Timer = require 'lib/knife.timer'
 
--- All the constants centralized
+-- Constants, global variables and utilities functions
 require 'src/constants'
+require 'src/Util'
 
 -- Game classes
-
 
 -- State machine and the game states

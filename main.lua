@@ -13,42 +13,54 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
     love.window.setTitle('Match-3')
 
-    -- Setting up the screen
+    -- Set the randomseed, used to generate random numbers
+    math.randomseed(os.time())
+
+    -- Sprite sheet of tiles
+    tileSprite = love.graphics.newImage('graphics/match3.png')
+
+    -- Individual tile quads
+    tileQuads = GenerateQuads(tileSprite, 32, 32)
+
+    -- Game board of tiles
+    board = generateBoard()
+
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
-        vsync = true,
         fullscreen = false,
+        vsync = true,
         resizable = true
     })
+
+    -- To keep track of the keys pressed
+    love.keyboard.keysPressed = {}
 end
 
--- Called when the screen is resized
 function love.resize(w, h)
     push:resize(w, h)
 end
 
--- Keyboard entry handler
 function love.keypressed(key)
     love.keyboard.keysPressed[key] = true
+
+    if key == 'escape' then 
+        love.event.quit()
+    end
 end
 
--- Used to check if a key was pressed in the last frame
 function love.keyboard.wasPressed(key)
     return love.keyboard.keysPressed[key]
 end
 
 function love.update(dt)
-    secondTimer = secondTimer + dt
-
-    if secondTimer > 1 then
-        currentSecond = currentSecond + 1
-        secondTimer =  secondTimer % 1
-    end
+    -- Reset the keys pressed
+    love.keyboard.keysPressed = {}
 end
 
 function love.draw()
     push:start()
 
-    love.graphics.printf('Timer: '.. tostring(currentSecond), 0, VIRTUAL_HEIGHT / 2 - 8, VIRTUAL_WIDTH, 'center')
+    -- Draws the board with and offset so it's centered
+    drawBoard(128, 16)
 
     push:finish()
 end

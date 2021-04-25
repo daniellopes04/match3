@@ -6,13 +6,11 @@
     Made by: Daniel de Sousa
     https://github.com/daniellopes04
 
-    All the constants used throughout the game are initialized here.
+    All the constants and global values used throughout the game are initialized here.
 ]]
 
--- Real size of window
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
--- Window size emulated
-VIRTUAL_WIDTH = 384
-VIRTUAL_HEIGHT = 216
+VIRTUAL_WIDTH = 512
+VIRTUAL_HEIGHT = 288
