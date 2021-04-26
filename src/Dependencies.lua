@@ -26,5 +26,9 @@ require 'src/constants'
 require 'src/Util'
 
 -- Game classes
+require 'src/classes/Board'
 
 -- State machine and the game states
+require 'src/StateMachine'
+require 'src/states/StartState'
+require 'src/states/PlayState'
