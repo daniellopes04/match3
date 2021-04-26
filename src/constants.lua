@@ -14,3 +14,11 @@ WINDOW_HEIGHT = 720
 
 VIRTUAL_WIDTH = 512
 VIRTUAL_HEIGHT = 288
+
+gTextures = {
+    ['main'] = love.graphics.newImage('graphics/match3.png')
+}
+
+gFrames = {
+    ['tiles'] = GenerateQuadsTiles(gTextures['main'])
+}

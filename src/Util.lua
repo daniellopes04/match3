@@ -11,90 +11,38 @@
 ]]
 
 --[[
-    Receives an "atlas" (a texture with multiple sprites) and the tile dimensions
-    Then, split the texture into all of the quads by dividing it evenly.
+    Receives an "atlas" (a texture with multiple sprites) then split the texture 
+    into all of the quads.
 ]]
-function GenerateQuads(atlas, tileWidth, tileHeight)
-    local sheetWidth = atlas:getWidth() / tileWidth
-    local sheetHeight = atlas:getHeight() / tileHeight
-
-    local sheetCounter = 1
-    local spritesheet = {}
-
-    for y = 0, sheetHeight - 1 do 
-        for x = 0, sheetWidth - 1  do
-            spritesheet[sheetCounter] = 
-                love.graphics.newQuad(x * tileWidth, y * tileHeight, tileWidth,
-                tileHeight, atlas:getDimensions())
-            sheetCounter = sheetCounter + 1
-        end
-    end
-
-    return spritesheet
-end
-
---[[
-    Populates a table with mini-tables each containing X and Y coordinates for tiles
-    Each tile also have a quad ID associated with it
-]] 
-function generateBoard()
+function GenerateQuadsTiles(atlas)
     local tiles = {}
 
-    -- Iterate over columns of tiles
-    for y = 1, 8 do 
-        -- Insert empty row
-        table.insert(tiles, {})
+    local x = 0
+    local y = 0
 
-        -- Iterate over rows of tiles
-        for x = 1, 8 do 
-            -- For the blank row inserted, add the tiles
-            table.insert(tiles[y], {
-                -- Coordinates are 0-base, so we subtract one before multiiplying
-                x = (x - 1) * 32,
-                y = (y - 1) * 32,
+    local counter = 1
 
-                -- What tile x and y this tile is
-                gridX = x,
-                gridY = y,
+    -- 9 rows of tiles
+    for row = 1, 9 do
+        -- Two sets of 6 columns per row
+        -- Different tile varieties
+        for i = 1, 2 do
+            tiles[counter] = {}
+            
+            for col = 1, 6 do
+                table.insert(tiles[counter], love.graphics.newQuad(
+                    x, y, 32, 32, atlas:getDimensions()
+                ))
 
-                -- Assign a random ID to tile
-                tile = math.random(#tileQuads)
-            })
+                x = x + 32
+            end
+
+            counter = counter + 1
         end
+
+        y = y + 32
+        x = 0
     end
 
     return tiles
-end
-
---[[
-    Draws each tile on the screen as well as the rectangle of the highlighted tile 
-    and the rectangle when a tile is selected 
-]] 
-function drawBoard(offsetX, offsetY)
-    -- Draw the columns
-    for y = 1, 8 do
-        -- Draw the rows
-        for x = 1, 8 do
-            local tile = board[y][x]
-
-            love.graphics.draw(tileSprite, tileQuads[tile.tile], 
-            tile.x + offsetX, tile.y + offsetY)
-
-            if highlightedTile then
-                if tile.gridX == highlightedX and tile.gridY == highlightedY then
-                    love.graphics.setColor(1, 1, 1, 0.5)
-                    love.graphics.rectangle('fill', tile.x + offsetX, tile.y + offsetY, 
-                    32, 32, 4)
-                    love.graphics.setColor(1, 1, 1, 1)
-                end
-            end
-        end
-    end
-
-    -- Current selected tile
-    love.graphics.setColor(1, 0, 0, 0.9)
-    love.graphics.setLineWidth(4)
-    love.graphics.rectangle('line', selectedTile.x + offsetX, selectedTile.y + offsetY,
-    32, 32, 4)
-    love.graphics.setColor(1, 1, 1, 1)
 end
