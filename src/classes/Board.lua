@@ -14,7 +14,7 @@ Board = Class{}
 
 function Board:init(x, y)
     self.x = x
-    self.y = Y
+    self.y = y
 
     -- To keep track of the matches
     self.matches = {}
@@ -31,15 +31,15 @@ function Board:initializeTiles()
     self.tiles = {}
 
     -- Iterate over columns of tiles
-    for y = 1, 8 do 
+    for tileY = 1, 8 do 
         -- Insert empty row
         table.insert(self.tiles, {})
 
         -- Iterate over rows of tiles
-        for x = 1, 8 do 
+        for tileX = 1, 8 do 
             -- For the blank row inserted, add the tiles
-            table.insert(self.tiles[y], Tile(
-                x, y,
+            table.insert(self.tiles[tileY], Tile(
+                tileX, tileY,
                 math.random(18),
                 math.random(6)
             ))

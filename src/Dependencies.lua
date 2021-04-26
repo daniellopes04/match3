@@ -6,7 +6,8 @@
     Made by: Daniel de Sousa
     https://github.com/daniellopes04
 
-    All the dependencies, including libraries and classes are loaded here.
+    All the dependencies, including libraries, classes and global variables are 
+    loaded here.
 ]]
 
 -- Push library
@@ -27,8 +28,17 @@ require 'src/Util'
 
 -- Game classes
 require 'src/classes/Board'
+require 'src/classes/Tile'
 
 -- State machine and the game states
 require 'src/StateMachine'
 require 'src/states/StartState'
 require 'src/states/PlayState'
+
+gTextures = {
+    ['main'] = love.graphics.newImage('graphics/match3.png')
+}
+
+gFrames = {
+    ['tiles'] = GenerateQuadsTiles(gTextures['main'])
+}

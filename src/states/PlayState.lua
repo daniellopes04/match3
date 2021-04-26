@@ -17,13 +17,15 @@
 
 PlayState = Class{__includes = BaseState}
 
-function PlayState:init(params)
+function PlayState:enter()
+    self.board = Board(128, 16)
+
     -- Tile selected to be swapped
     self.highlightedTile = false
     self.highlightedX, self.highlightedY = 1, 1
 
     -- Current selected tile, changed with arrow keys
-    self.selectedTile = board[1][1]
+    self.selectedTile = self.board.tiles[1][1]
 end
 
 function PlayState:update(dt)
@@ -32,19 +34,19 @@ function PlayState:update(dt)
     -- Moving the selected tile
     if love.keyboard.wasPressed('up') then
         if y > 1 then
-            self.selectedTile = self.board[y - 1][x]
+            self.selectedTile = self.board.tiles[y - 1][x]
         end
     elseif love.keyboard.wasPressed('down') then
         if y < 8 then
-            self.selectedTile = self.board[y + 1][x]
+            self.selectedTile = self.board.tiles[y + 1][x]
         end
     elseif love.keyboard.wasPressed('left') then
         if x > 1 then
-            self.selectedTile = self.board[y][x - 1]
+            self.selectedTile = self.board.tiles[y][x - 1]
         end
     elseif love.keyboard.wasPressed('right') then
         if x < 8 then
-            self.selectedTile = self.board[y][x + 1]
+            self.selectedTile = self.board.tiles[y][x + 1]
         end
     end
     
@@ -93,5 +95,5 @@ end
 
 function PlayState:render()
     -- Draws the board with and offset so it's centered
-    drawBoard(128, 16)
+    self.board:render()
 end
