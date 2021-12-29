@@ -18,10 +18,12 @@
 PlayState = Class{__includes = BaseState}
 
 function PlayState:enter()
-    self.board = Board(128, 16)
+    self.offsetX = 128
+    self.offsetY = 16
+    self.board = Board(self.offsetX, self.offsetY)
 
     -- Tile selected to be swapped
-    self.highlightedTile = false
+    self.highlightedTile = nil
     self.highlightedX, self.highlightedY = 1, 1
 
     -- Current selected tile, changed with arrow keys
@@ -55,34 +57,34 @@ function PlayState:update(dt)
         if not self.highlightedTile then
             self.highlightedTile = true
             self.highlightedX, self.highlightedY = self.selectedTile.gridX, self.selectedTile.gridY
-        elseif math.abs(self.highlightedX - self.selectedTile.gridX) + 
-        math.abs(self.highlightedY - self.selectedTile.gridY) > 1 then
-            self.highlightedTile = false
+            self.highlightedTile = self.board.tiles[y][x]
+        -- if we select the position already highlighted, remove highlight
+        elseif self.highlightedTile == self.board.tiles[y][x] then
+            self.highlightedTile = nil
+        elseif math.abs(self.highlightedX - self.selectedTile.gridX) + math.abs(self.highlightedY - self.selectedTile.gridY) > 1 then
+            self.highlightedTile = nil
         else
-            local tile1 = self.selectedTile
-            local tile2 = self.board[highlightedY][highlightedX]
+            -- Swap grid positions of tiles
+            local tempX, tempY = self.highlightedTile.gridX, self.highlightedTile.gridY
+            local newTile = self.board.tiles[y][x]
 
-            -- Temporary swap information
-            local tempX, tempY = tile2.x, tile2.y 
-            local tempGridX, tempGridY = tile2.gridX, tile2.gridY
+            self.highlightedTile.gridX = newTile.gridX
+            self.highlightedTile.gridY = newTile.gridY
+            newTile.gridX = tempX
+            newTile.gridY = tempY
 
-            -- Swap places in the board
-            local tempTile = tile1
-            self.board[tile1.gridY][tile1.gridX] = tile2
-            self.board[tile2.gridY][tile2.gridX] = tempTile
+            -- Swap tiles in the tiles table
+            self.board.tiles[self.highlightedTile.gridY][self.highlightedTile.gridX] = self.highlightedTile
+            self.board.tiles[newTile.gridY][newTile.gridX] = newTile
 
-            -- Swap tile coordinates using tween
+            -- Tween coordinates between the two so they swap
             Timer.tween(0.2, {
-                [tile2] = {x = tile1.x, y = tile1.y},
-                [tile1] = {x = tempX, y = tempY}
+                [self.highlightedTile] = {x = newTile.x, y = newTile.y},
+                [newTile] = {x = self.highlightedTile.x, y = self.highlightedTile.y}
             })
-            
-            tile2.gridX, tile2.gridY = tile1.gridX, tile1.gridY
-            tile1.gridX, tile1.gridY = tempGridX, tempGridY
 
-            -- Unhighlight the tile and reset selection
-            self.highlightedTile = false
-            self.selectedTile = tile2
+            self.selectedTile = self.highlightedTile
+            self.highlightedTile = nil
         end
     end
 
@@ -96,4 +98,23 @@ end
 function PlayState:render()
     -- Draws the board with and offset so it's centered
     self.board:render()
+
+    -- Highlights selected tile
+    if self.highlightedTile then
+        -- Multiply so drawing white rect makes it brighter
+        love.graphics.setBlendMode('add')
+
+        love.graphics.setColor(1, 1, 1, 96/255)
+        love.graphics.rectangle('fill', (self.highlightedTile.gridX - 1) * 32 + self.offsetX,
+            (self.highlightedTile.gridY - 1) * 32 + self.offsetY, 32, 32, 4)
+
+        -- Back to alpha
+        love.graphics.setBlendMode('alpha')
+    end
+
+    -- Draws rectangle around current tile
+    love.graphics.setColor(1, 0, 0, 234/255)
+    love.graphics.setLineWidth(4)
+    love.graphics.rectangle('line', self.selectedTile.x + self.offsetX, self.selectedTile.y + self.offsetY, 32, 32, 4)
+    love.graphics.setColor(1, 1, 1, 1)
 end
