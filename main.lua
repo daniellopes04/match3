@@ -19,15 +19,25 @@ function love.load()
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
         vsync = true,
-        resizable = true
+        resizable = true,
+        canvas = true
     })
+
+    -- Initializa game music
+    gSounds['music']:setLooping(true)
+    gSounds['music']:play()
 
     -- Initialize state machine with all state-returning functions
     gStateMachine = StateMachine {
         ['start'] = function() return StartState() end,
-        ['play'] = function() return PlayState() end
+        ['begin-game'] = function() return BeginGameState() end,
+        ['play'] = function() return PlayState() end,
+        ['game-over'] = function() return GameOverState() end
     }
-    gStateMachine:change('play')
+    gStateMachine:change('start')
+
+    -- Keep track of scrolling our background on the X axis
+    backgroundX = 0
 
     -- To keep track of the keys pressed
     love.keyboard.keysPressed = {}
@@ -46,6 +56,14 @@ function love.keyboard.wasPressed(key)
 end
 
 function love.update(dt)
+    -- Scroll background
+    backgroundX = backgroundX - BACKGROUND_SCROLL_SPEED * dt
+
+    -- If we've scrolled the entire image, reset it to 0
+    if backgroundX <= -1024 + VIRTUAL_WIDTH - 4 + 51 then
+        backgroundX = 0
+    end
+
     gStateMachine:update(dt)
 
     love.keyboard.keysPressed = {}
@@ -53,6 +71,8 @@ end
 
 function love.draw()
     push:start()
+
+    love.graphics.draw(gTextures['background'], backgroundX, 0)
 
     gStateMachine:render()
 
