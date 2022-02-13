@@ -66,6 +66,8 @@ function Board:calculateMatches()
     -- How many of the same color blocks in a row we've found
     local matchNum = 1
 
+    local removeRow = false
+
     -- Horizontal matches first
     for y = 1, 8 do
         local colorToMatch = self.tiles[y][1].color
@@ -89,7 +91,21 @@ function Board:calculateMatches()
                     for x2 = x - 1, x - matchNum, -1 do
                         -- Add each tile to the match that's in that match
                         table.insert(match, self.tiles[y][x2])
+                        
+                        if self.tiles[y][x2].shiny then
+                            removeRow = true
+                        end
                     end
+                    
+                    if removeRow then
+                        match = {}
+
+                        for k = 1, 8 do
+                            table.insert(match, self.tiles[y][k])
+                        end
+                    
+                        removeRow = false
+                    end 
 
                     -- Add this match to our total matches table
                     table.insert(matches, match)
@@ -135,7 +151,21 @@ function Board:calculateMatches()
 
                     for y2 = y - 1, y - matchNum, -1 do
                         table.insert(match, self.tiles[y2][x])
+
+                        if self.tiles[y2][x].shiny then
+                            removeRow = true
+                        end
                     end
+
+                    if removeRow then
+                        match = {}
+
+                        for k = 1, 8 do
+                            table.insert(match, self.tiles[k][x])
+                        end
+
+                        removeRow = false
+                    end 
 
                     table.insert(matches, match)
                 end
@@ -251,6 +281,14 @@ function Board:getFallingTiles()
     end
 
     return tweens
+end
+
+function Board:update(dt)
+    for y = 1, #self.tiles do
+        for x = 1, #self.tiles[1] do
+            self.tiles[y][x]:update(dt)
+        end
+    end
 end
 
 function Board:render()

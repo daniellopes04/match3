@@ -173,6 +173,7 @@ function PlayState:update(dt)
     end
 
     Timer.update(dt)
+    self.board:update(dt)
 end
 
 --[[
@@ -191,9 +192,10 @@ function PlayState:calculateMatches()
         gSounds['match']:stop()
         gSounds['match']:play()
 
-        -- Add score for each match
+        -- Add score and time for each match
         for k, match in pairs(matches) do
             self.score = self.score + #match * 50 + match[k].variety * 25
+            self.timer = self.timer + #match
         end
 
         -- Remove any tiles that matched from the board, making empty spaces
