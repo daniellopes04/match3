@@ -127,7 +127,21 @@ function Board:calculateMatches()
             -- Go backwards from end of last row by matchNum
             for x = 8, 8 - matchNum + 1, -1 do
                 table.insert(match, self.tiles[y][x])
+
+                if self.tiles[y][x].shiny then
+                    removeRow = true
+                end
             end
+
+            if removeRow then
+                match = {}
+
+                for k = 1, 8 do
+                    table.insert(match, self.tiles[y][k])
+                end
+            
+                removeRow = false
+            end 
 
             table.insert(matches, match)
         end
@@ -186,7 +200,21 @@ function Board:calculateMatches()
             -- Go backwards from end of last row by matchNum
             for y = 8, 8 - matchNum, -1 do
                 table.insert(match, self.tiles[y][x])
+
+                if self.tiles[y][x].shiny then
+                    removeRow = true
+                end
             end
+
+            if removeRow then
+                match = {}
+
+                for k = 1, 8 do
+                    table.insert(match, self.tiles[k][x])
+                end
+
+                removeRow = false
+            end 
 
             table.insert(matches, match)
         end
