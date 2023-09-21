@@ -14,7 +14,7 @@
     Receives an "atlas" (a texture with multiple sprites) then split the texture 
     into all of the quads.
 ]]
-function GenerateQuadsTiles(atlas)
+function GenerateQuadsTilesOld(atlas)
     local tiles = {}
 
     local x = 0
@@ -41,6 +41,39 @@ function GenerateQuadsTiles(atlas)
         end
 
         y = y + 32
+        x = 0
+    end
+
+    return tiles
+end
+
+function GenerateQuadsTiles(atlas)
+    local tiles = {}
+
+    local x = 0
+    local y = 0
+
+    local counter = 1
+    -- Color # starts from left to right, then goes down
+    local selectedTiles = {1, 4, 6, 9, 10, 11, 12, 17}
+
+    for i = 1, #selectedTiles do
+        tiles[counter] = {}
+
+        if selectedTiles[i] % 2 == 0 then
+            x = 32 * 6
+        end
+        y = (math.ceil(selectedTiles[i]/2) * 32) - 32
+
+        for col = 1, 6 do
+            table.insert(tiles[counter], love.graphics.newQuad(
+                x, y, 32, 32, atlas:getDimensions()
+            ))
+
+            x = x + 32
+        end
+
+        counter = counter + 1
         x = 0
     end
 

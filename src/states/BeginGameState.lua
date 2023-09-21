@@ -21,12 +21,19 @@ function BeginGameState:init()
 
     -- Start our level # label off-screen
     self.levelLabelY = -64
+
+    self.timer = 60
+    self.score = 0
 end
 
 function BeginGameState:enter(def)
     
     -- Grab level # from the def we're passed
     self.level = def.level
+
+    -- Set timer and score to params value
+    self.timer = def.timer
+    self.score = def.score
 
     -- Spawn a board and place it toward the right
     self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
@@ -57,7 +64,9 @@ function BeginGameState:enter(def)
                 :finish(function()
                     gStateMachine:change('play', {
                         level = self.level,
-                        board = self.board
+                        board = self.board,
+                        timer = self.timer,
+                        score = self.score
                     })
                 end)
             end)

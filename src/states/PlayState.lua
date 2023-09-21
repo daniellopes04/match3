@@ -38,6 +38,11 @@ function PlayState:init()
     self.score = 0
     self.timer = 60
 
+    self.swapped = false
+
+    -- Start our level # label off-screen
+    self.levelLabelY = -64
+
     -- Set our Timer class to turn cursor highlight on and off
     Timer.every(0.5, function()
         self.rectHighlighted = not self.rectHighlighted
@@ -67,6 +72,9 @@ function PlayState:enter(params)
 
     -- Score we have to reach to get to the next level
     self.scoreGoal = self.level * 1.25 * 1000
+
+    self.timer = params.timer
+    self.score = params.score
 end
 
 function PlayState:update(dt)
@@ -99,7 +107,8 @@ function PlayState:update(dt)
         -- Change to begin game state with new level (incremented)
         gStateMachine:change('begin-game', {
             level = self.level + 1,
-            score = self.score
+            score = self.score,
+            timer = 60
         })
     end
 
@@ -121,7 +130,8 @@ function PlayState:update(dt)
 
         -- If we've pressed enter, to select or deselect a tile...
         if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
-            
+            self.swapped = false
+
             -- If same tile as currently highlighted, deselect
             local x = self.boardHighlightX + 1
             local y = self.boardHighlightY + 1
@@ -140,33 +150,35 @@ function PlayState:update(dt)
                 gSounds['error']:play()
                 self.highlightedTile = nil
             else
-                
-                -- Swap grid positions of tiles
-                local tempX = self.highlightedTile.gridX
-                local tempY = self.highlightedTile.gridY
+                self:swapTiles(self.highlightedTile, self.board.tiles[y][x], false)
 
-                local newTile = self.board.tiles[y][x]
-
-                self.highlightedTile.gridX = newTile.gridX
-                self.highlightedTile.gridY = newTile.gridY
-                newTile.gridX = tempX
-                newTile.gridY = tempY
-
-                -- Swap tiles in the tiles table
-                self.board.tiles[self.highlightedTile.gridY][self.highlightedTile.gridX] =
-                    self.highlightedTile
-
-                self.board.tiles[newTile.gridY][newTile.gridX] = newTile
-
-                -- Tween coordinates between the two so they swap
-                Timer.tween(0.1, {
-                    [self.highlightedTile] = {x = newTile.x, y = newTile.y},
-                    [newTile] = {x = self.highlightedTile.x, y = self.highlightedTile.y}
-                })
-                
-                -- Once the swap is finished, we can tween falling blocks as needed
-                :finish(function()
-                    self:calculateMatches()
+                Timer.after(0.25, function()
+                    if (not self:checkIfMatchesExist()) then
+                        -- Start a transition of our text label to the center of the screen
+                        Timer.tween(0.25, {
+                            [self] = {levelLabelY = VIRTUAL_HEIGHT / 2 - 8}
+                        })
+                        
+                        -- After that, pause for one second with Timer.after
+                        :finish(function()
+                            Timer.after(1, function()
+                                
+                                -- Then, animate the label going down past the bottom edge
+                                Timer.tween(0.25, {
+                                    [self] = {levelLabelY = VIRTUAL_HEIGHT + 30}
+                                })
+                                
+                                -- Change to begin game state with same level
+                                :finish(function()
+                                    gStateMachine:change('begin-game', {
+                                        level = self.level,
+                                        score = self.score,
+                                        timer = self.timer
+                                    })
+                                end)
+                            end)
+                        end)
+                    end
                 end)
             end
         end
@@ -174,6 +186,93 @@ function PlayState:update(dt)
 
     Timer.update(dt)
     self.board:update(dt)
+end
+
+--[[
+    Swaps tiles positions
+]]
+function PlayState:swapTiles(currentTile, selectedTile, pretend)
+    -- Swap grid positions of tiles
+    local tempX = currentTile.gridX
+    local tempY = currentTile.gridY
+
+    currentTile.gridX = selectedTile.gridX
+    currentTile.gridY = selectedTile.gridY
+    
+    selectedTile.gridX = tempX
+    selectedTile.gridY = tempY
+
+    if self.board ~= nil then
+        -- Swap tiles in the tiles table
+        self.board.tiles[currentTile.gridY][currentTile.gridX] = currentTile
+        self.board.tiles[selectedTile.gridY][selectedTile.gridX] = selectedTile
+        
+        if not pretend then
+            self.highlightedTile = selectedTile
+
+            -- Tween coordinates between the two so they swap
+            Timer.tween(0.1, {
+                [currentTile] = {x = selectedTile.x, y = selectedTile.y},
+                [selectedTile] = {x = currentTile.x, y = currentTile.y}
+            })
+            
+            -- Once the swap is finished, we can tween falling blocks as needed
+            :finish(function()
+                if self.board:calculateMatches() then
+                    self:calculateMatches()
+                else
+                    if not self.swapped then
+                        self:swapTiles(selectedTile, currentTile, false)
+                        self.swapped = true
+                    end
+                end
+            end)
+        end
+    end
+end
+
+--[[
+    Check if given position is adjacent to current one
+]]
+function PlayState:isValidPosition(newPositionX, newPositionY)
+    if (newPositionX < 1 or newPositionY < 1 or 
+        newPositionX > 8 or newPositionY > 8) then
+        return false
+    end
+    return true
+end
+
+--[[
+    Checks if there any possible matches in the board
+]]
+function PlayState:checkIfMatchesExist()
+    local matchFount = false
+
+    for y = 1, 8 do
+        for x = 1, 8 do
+            -- Checks possible swaps
+            for i = -1, 1, 2 do
+                if (self:isValidPosition(x + i, y)) then
+                    self:swapTiles(self.board.tiles[y][x], self.board.tiles[y][x + i], true)
+                    matchFound = self.board:calculateMatches()
+                    self:swapTiles(self.board.tiles[y][x + i], self.board.tiles[y][x], true)
+                    if matchFound then
+                        return true
+                    end
+                end
+                if (self:isValidPosition(x, y + i)) then
+                    self:swapTiles(self.board.tiles[y][x], self.board.tiles[y + i][x], true)
+                    matchFound = self.board:calculateMatches()
+                    self:swapTiles(self.board.tiles[y + i][x], self.board.tiles[y][x], true)
+                    if matchFound then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+
+    return false
 end
 
 --[[
@@ -259,4 +358,12 @@ function PlayState:render()
     love.graphics.printf('Score: ' .. tostring(self.score), 20, 52, 182, 'center')
     love.graphics.printf('Goal : ' .. tostring(self.scoreGoal), 20, 80, 182, 'center')
     love.graphics.printf('Timer: ' .. tostring(self.timer), 20, 108, 182, 'center')
+
+
+    -- Render no more matches message label and background rect
+    love.graphics.setColor(95/255, 205/255, 228/255, 200/255)
+    love.graphics.rectangle('fill', 0, self.levelLabelY - 8, VIRTUAL_WIDTH, 48)
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.setFont(gFonts['large'])
+    love.graphics.printf('No more matches... ', 0, self.levelLabelY, VIRTUAL_WIDTH, 'center')
 end

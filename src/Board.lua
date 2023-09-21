@@ -41,7 +41,8 @@ function Board:initializeTiles()
             -- For the blank row inserted, add the tiles
             table.insert(self.tiles[tileY], Tile(
                 tileX, tileY,
-                math.random(18),
+                --math.random(18),
+                math.random(8),
                 math.random(math.min(6, (self.level % 2 + self.level % 12) / 2))
             ))
         end
@@ -297,7 +298,8 @@ function Board:getFallingTiles()
 
             -- If the tile is nil, we need to add a new one
             if not tile then
-                local tile = Tile(x, y, math.random(18), math.random(math.min(6, (self.level % 2 + self.level % 12) / 2)))
+                --local tile = Tile(x, y, math.random(18), math.random(math.min(6, (self.level % 2 + self.level % 12) / 2)))
+                local tile = Tile(x, y, math.random(8), math.random(math.min(6, (self.level % 2 + self.level % 12) / 2)))
                 tile.y = -32
                 self.tiles[y][x] = tile
 

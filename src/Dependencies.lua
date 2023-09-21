@@ -55,6 +55,7 @@ gTextures = {
 }
 
 gFrames = {
+    --['tiles'] = GenerateQuadsTilesOld(gTextures['main'])
     ['tiles'] = GenerateQuadsTiles(gTextures['main'])
 }
 
